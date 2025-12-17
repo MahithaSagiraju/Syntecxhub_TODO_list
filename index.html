@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Simple To‑Do List</title>
+	<style>
+		:root{
+			/* updated color palette */
+			--bg:#f0f9ff;
+			--card:#ffffff;
+			--muted:#6b7280;
+			--accent:#06b6d4;      /* teal */
+			--accent-2:#7c3aed;    /* purple */
+			--danger:#ef4444;
+			--success:#10b981;
+			--glass: rgba(255,255,255,0.6);
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+		}
+		html,body{
+			height:100%;
+			margin:0;
+			/* colorful animated gradient background (adjusted palette) */
+			background: linear-gradient(270deg,#06b6d4 0%, #7c3aed 30%, #f472b6 60%, #60a5fa 100%);
+			background-size: 800% 800%;
+			animation: gradientShift 14s ease infinite;
+			color:#0f172a;
+			-webkit-font-smoothing:antialiased;
+			-moz-osx-font-smoothing:grayscale;
+		}
+		.container{
+			max-width:720px;
+			margin:48px auto;
+			padding:20px;
+		}
+		.card{
+			/* glassy card using new accents */
+			background: linear-gradient(180deg, rgba(255,255,255,0.85), var(--card));
+			backdrop-filter: blur(6px);
+			border-radius:14px;
+			padding:22px;
+			box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+			border: 1px solid rgba(124,58,237,0.06); /* subtle purple border */
+		}
+		h1{
+			font-size:20px;
+			margin:0 0 8px 0;
+			letter-spacing:0.2px;
+		}
+		.header{
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			gap:12px;
+			margin-bottom:18px;
+			padding-bottom:6px;
+			border-bottom:1px solid #f3f4ff;
+		}
+		.counter{
+			font-size:13px;
+			color:var(--muted);
+		}
+		.input-row{
+			display:flex;
+			gap:8px;
+			margin-bottom:14px;
+		}
+		.input-row input[type="text"]{
+			flex:1;
+			padding:12px 14px;
+			border-radius:10px;
+			border:1px solid #e6e9ef;
+			font-size:15px;
+			outline:none;
+			transition:box-shadow .15s, border-color .15s, transform .08s;
+			background: linear-gradient(180deg,#fff,#fbfdff);
+		}
+		.input-row input[type="text"]:focus{
+			border-color:var(--accent);
+			box-shadow:0 4px 12px rgba(79,70,229,0.08);
+		}
+		.add-button{
+			background: linear-gradient(90deg,var(--accent), var(--accent-2));
+			color:white;
+			border:none;
+			padding:10px 14px;
+			border-radius:10px;
+			cursor:pointer;
+			font-weight:600;
+			transition:transform .12s ease, box-shadow .16s;
+			box-shadow:0 8px 20px rgba(99,102,241,0.12);
+		}
+		.add-button:hover{ transform:translateY(-3px); box-shadow:0 18px 36px rgba(99,102,241,0.14); }
+		.todo-list{
+			list-style:none;
+			margin:0;
+			padding:0;
+			display:flex;
+			flex-direction:column;
+			gap:10px;
+		}
+		.todo-item{
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			padding:12px;
+			border-radius:10px;
+			border:1px solid #f0f2f7;
+			transition:background .12s, transform .06s;
+		}
+		.todo-item{
+			transition:background .12s, transform .06s, box-shadow .12s;
+		}
+		.todo-item:hover{ transform:translateY(-4px); background:linear-gradient(0deg,#fff,#fbfdff); box-shadow:0 10px 30px rgba(15,23,42,0.06); }
+		.todo-left{
+			display:flex;
+			align-items:center;
+			gap:12px;
+			min-width:0;
+		}
+		.checkbox{
+			width:36px;
+			height:36px;
+			display:inline-grid;
+			place-items:center;
+			border-radius:9px;
+			cursor:pointer;
+			border:1px solid #eef2ff;
+			background:linear-gradient(180deg,#ffffff,#fbfdff);
+			transition:background .12s, box-shadow .12s;
+			font-size:18px;
+		}
+		.checkbox:hover{ box-shadow:0 8px 18px rgba(6,182,212,0.10); }
+		.todo-text{
+			overflow:hidden;
+			text-overflow:ellipsis;
+			white-space:normal; /* allow wrapping for long tasks */
+			font-size:15px;
+			line-height:1.3;
+			max-width:420px;
+		}
+		.todo-text.completed{
+			text-decoration:line-through;
+			opacity:0.5;
+			color:var(--muted);
+		}
+		.actions{
+			display:flex;
+			gap:8px;
+			align-items:center;
+		}
+		.icon-button{
+			background:transparent;
+			border:none;
+			padding:8px;
+			border-radius:8px;
+			cursor:pointer;
+			transition:background .12s, transform .08s;
+			font-size:16px;
+		}
+		.icon-button:hover{ background: rgba(124,58,237,0.06); transform:translateY(-2px); }
+		.icon-delete{ color:var(--danger); }
+		.icon-edit{ color:var(--accent-2); }
+		.empty{
+			text-align:center;
+			color:var(--muted);
+			padding:18px 10px;
+			font-size:14px;
+		}
+
+		/* Responsive */
+		@media (max-width:480px){
+			.container{ margin:20px; padding:12px; }
+			.add-button{ padding:10px; }
+			.checkbox{ width:40px; height:40px; font-size:20px; }
+		}
+		/* animated gradient keyframes */
+		@keyframes gradientShift {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="card" role="application" aria-labelledby="app-title">
+			<div class="header">
+				<div>
+					<h1 id="app-title">Simple To‑Do List</h1>
+					<div class="counter" id="task-counter">0 tasks</div>
+				</div>
+				<div style="font-size:13px;color:var(--muted)">✔️ Complete • ✏️ Edit • 🗑️ Delete</div>
+			</div>
+
+			<form id="task-form" class="input-row" aria-label="Add new task">
+				<input id="task-input" type="text" placeholder="Add a new task and press Add" autocomplete="off" />
+				<button type="submit" class="add-button" aria-label="Add task">Add</button>
+			</form>
+
+			<ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+
+			<div id="empty-state" class="empty" hidden>No tasks yet — add your first one above.</div>
+		</div>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+</html>
+
